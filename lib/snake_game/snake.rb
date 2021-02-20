@@ -1,6 +1,7 @@
 class SnakeGame
   class Snake
     attr_reader :coordinates
+    attr_reader :reserved_growth_coordinates
 
     def initialize(coordinates, direction)
       @coordinates  = coordinates

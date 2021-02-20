@@ -3,26 +3,34 @@ require_relative 'snake_game/renderer'
 require_relative 'snake_game/key_prompt'
 
 class SnakeGame
-  def initialize
-    @board     = Board.new(20, 20)
+  def initialize(rows = 10, cols = 10, speed: 0.3)
+    @board     = Board.new(rows, cols)
+    @speed     = speed
     @game_over = false
-    @speed     = 0.3
+    @pause     = false
   end
 
   def run
     inkey_thread
 
     until @game_over
-      Renderer::render_board(@board)
+      Renderer::render_board(@board, pause: @pause)
 
       sleep @speed
 
-      @game_over = !@board.snake_move
+      unless @pause
+        # snake が動けなくなるか、clear したら game over
+        @game_over = !@board.snake_move || stage_clear?
+      end
     end
+
+    # 最終局面を表示
+    Renderer::render_board(@board)
 
     inkey_thread.kill
 
-    puts "\r\ngame over!!!\r\n"
+    puts stage_clear? ? "\r\n Stage Clear ! \r\n" :
+      "\r\ngame over!!!\r\n"
   end
 
   private
@@ -43,6 +51,10 @@ class SnakeGame
   def inkey_thread
     @_inkey_thread ||= Thread.new do
       KeyPrompt.loop do |input|
+        if input == ' '
+          @pause = !@pause
+        end
+
         direction = INKEYS_TO_DIRECTIONS[input]
         @board.set_snake_direction(direction) if direction
       end
@@ -53,5 +65,10 @@ class SnakeGame
 
   def game_over?
     @game_over
+  end
+
+  # snake が 全体の 1/4 を埋めたら clear
+  def stage_clear?
+    @board.score >= (@board.rows * @board.cols / 4)
   end
 end

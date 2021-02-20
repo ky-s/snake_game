@@ -2,6 +2,8 @@ require_relative 'snake'
 
 class SnakeGame
   class Board
+    attr_reader :rows, :cols
+
     def initialize(rows, cols)
       @rows = rows
       @cols = cols
@@ -47,13 +49,7 @@ class SnakeGame
       @bait_coordinate = new_bait_coordinate
     end
 
-    def display
-      merge_objects.map(&:join).join("\r\n")
-    end
-
-    private
-
-    def merge_objects
+    def field
       Array.new(@rows) { Array.new(@cols, '.') }.tap do |board|
         @snake.coordinates.each do |i, j|
           board[i][j] = '*'
@@ -64,11 +60,19 @@ class SnakeGame
       end
     end
 
+    def score
+      @snake.coordinates.size +
+        @snake.reserved_growth_coordinates.size
+    end
+
+    private
+
     def initial_snake
       j = (@cols - 1) / 2
+      first_size = @rows / 4
 
       coordinates =
-        ((@rows - 8)..(@rows - 2)).each.with_index(1).map { |i| [i, j] }
+        ( @rows - (first_size + 2) ).upto(@rows - 2).map { |i| [i, j] }
 
       Snake.new(coordinates, :UP)
     end

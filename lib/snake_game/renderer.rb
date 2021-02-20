@@ -3,10 +3,17 @@ class SnakeGame
 
     module_function
 
-    def render_board(board)
+    # SKIN = '□■◆'
+    SKIN = '⬜⬛🔶'
+
+    def render_board(board, skin: SKIN, pause: false)
       refreash_screen
 
-      puts board.display + "\r\n"
+      puts board.field.
+        map { |row| row.join.tr('.*@', skin) }.join("\r\n")
+
+      puts "\r\nScore: #{board.score}\r\n"
+      puts "     [Pause]    " if pause
     end
 
     def refreash_screen
