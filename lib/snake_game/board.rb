@@ -1,45 +1,76 @@
 require_relative 'snake'
-class Board
-  def initialize(rows, cols)
-    @rows = rows
-    @cols = cols
-    @snake = initial_snake
-  end
 
-  def set_snake_direction(direction)
-    @snake.set_direction(direction)
-  end
+class SnakeGame
+  class Board
+    def initialize(rows, cols)
+      @rows = rows
+      @cols = cols
 
-  def snake_move
-    Range.new(0, @rows-1).include?(@snake.next_head_position[0]) or
-      return false
+      @snake = initial_snake
 
-    Range.new(0, @cols-1).include?(@snake.next_head_position[1]) or
-      return false
+      put_bait
+    end
 
-    @snake.move
-  end
+    def set_snake_direction(direction)
+      @snake.set_direction(direction)
+    end
 
-  def display
-    merge_snake.map(&:join).join("\r\n")
-  end
+    def snake_move
+      Range.new(0, @rows-1).include?(@snake.next_head_coordinate[0]) or
+        return false
 
-  private
+      Range.new(0, @cols-1).include?(@snake.next_head_coordinate[1]) or
+        return false
 
-  def merge_snake
-    Array.new(@rows) { Array.new(@cols, '.') }.tap do |board|
-      @snake.coordinates.each do |i, j|
-        board[i][j] = '*'
+      @snake.move or
+        return false
+
+      # snake eat bait
+      if @snake.coordinates.first == @bait_coordinate
+        @snake.set_growth_coordinate(@bait_coordinate)
+        put_bait
+      end
+
+      true
+    end
+
+    def put_bait
+      generated = false
+
+      until generated
+        new_bait_coordinate =
+          @rows.times.zip(@cols.times).sample
+
+        generated = !@snake.coordinates.include?(new_bait_coordinate)
+      end
+
+      @bait_coordinate = new_bait_coordinate
+    end
+
+    def display
+      merge_objects.map(&:join).join("\r\n")
+    end
+
+    private
+
+    def merge_objects
+      Array.new(@rows) { Array.new(@cols, '.') }.tap do |board|
+        @snake.coordinates.each do |i, j|
+          board[i][j] = '*'
+        end
+
+        i, j = *@bait_coordinate
+        board[i][j] = '@'
       end
     end
-  end
 
-  def initial_snake
-    j = (@cols - 1) / 2
+    def initial_snake
+      j = (@cols - 1) / 2
 
-    coordinates =
-      ((@rows - 5)..(@rows - 2)).each.with_index(1).map { |i| [i, j] }
+      coordinates =
+        ((@rows - 8)..(@rows - 2)).each.with_index(1).map { |i| [i, j] }
 
-    Snake.new(coordinates, :UP)
+      Snake.new(coordinates, :UP)
+    end
   end
 end

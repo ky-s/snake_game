@@ -1,5 +1,6 @@
 require_relative 'snake_game/board'
-require 'io/console'
+require_relative 'snake_game/renderer'
+require_relative 'snake_game/key_prompt'
 
 class SnakeGame
   def initialize
@@ -9,38 +10,22 @@ class SnakeGame
   end
 
   def run
-    [inkey_thread, renderer_thread].map(&:join)
+    inkey_thread
+
+    until @game_over
+      Renderer::render_board(@board)
+
+      sleep @speed
+
+      @game_over = !@board.snake_move
+    end
+
+    inkey_thread.kill
+
+    puts "\r\ngame over!!!\r\n"
   end
 
   private
-
-  # 定期的にボードを描画するスレッド
-  # game_over? になったら終了します
-  def renderer_thread
-    @_renderer_thread ||= Thread.new do
-      until game_over?
-        sleep @speed
-        render_board
-        @game_over = !@board.snake_move
-      end
-
-      puts "\r\ngame over!!!\r\n"
-      sleep 1
-      refreash_screen
-
-      inkey_thread.kill
-    end
-  end
-
-  def render_board
-    refreash_screen
-
-    puts @board.display + "\r\n"
-  end
-
-  def refreash_screen
-    system('clear')
-  end
 
   INKEYS_TO_DIRECTIONS = {
     "k" => :UP,
@@ -53,10 +38,7 @@ class SnakeGame
   # Control+c が押されたら終了します
   def inkey_thread
     @_inkey_thread ||= Thread.new do
-      input = nil
-      until input == "\C-c" || game_over?
-        input = STDIN.getch
-
+      KeyPrompt.loop do |input|
         direction = INKEYS_TO_DIRECTIONS[input]
         @board.set_snake_direction(direction) if direction
       end

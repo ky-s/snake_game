@@ -1,40 +1,62 @@
-class Snake
-  attr_reader :coordinates
+class SnakeGame
+  class Snake
+    attr_reader :coordinates
 
-  def initialize(coordinates, direction)
-    @coordinates  = coordinates
-    @direction    = direction
-  end
+    def initialize(coordinates, direction)
+      @coordinates  = coordinates
+      @direction    = direction
+      @reserved_growth_coordinates = []
+    end
 
-  def set_direction(direction)
-    @direction = direction
-  end
+      # 餌を取得したとき、tail が通り越したら成長する位置を覚えておく
+    def set_growth_coordinate(coordinate)
+      @reserved_growth_coordinates << coordinate
+    end
 
-  def next_head_position
-    @coordinates.first.
-      zip(direction_diff).map(&:sum)
-  end
+    def set_direction(direction)
+      @direction = direction
+    end
 
-  def move
-    @coordinates[1..-2].include?(next_head_position) and
-      return false
+    def next_head_coordinate
+      @coordinates.first.
+        zip(direction_diff).map(&:sum)
+    end
 
-    @coordinates =
-      [next_head_position, *@coordinates[0..-2]]
+    def move
+      growth =
+        @coordinates[-1] == @reserved_growth_coordinates.first
 
-    true
-  end
+      next_body_coordinates = if growth
+                                # 今回成長するので reserved から外す
+                                @reserved_growth_coordinates.shift
 
-  private
+                                # 成長する時は tail の位置が消えずに残る
+                                @coordinates
+                              else
+                                # tail の座標は含めない
+                                @coordinates[0..-2]
+                              end
 
-  DIRECTIONS_AND_DIFFS = {
-    UP:    [-1, 0],
-    DOWN:  [+1, 0],
-    LEFT:  [0, -1],
-    RIGHT: [0, +1]
-  }
+      next_body_coordinates.include?(next_head_coordinate) and
+        return false
 
-  def direction_diff
-    DIRECTIONS_AND_DIFFS[@direction]
+      # update coordinates
+      @coordinates = [next_head_coordinate, *next_body_coordinates]
+
+      true
+    end
+
+    private
+
+    DIRECTIONS_AND_DIFFS = {
+      UP:    [-1, 0],
+      DOWN:  [+1, 0],
+      LEFT:  [0, -1],
+      RIGHT: [0, +1]
+    }
+
+    def direction_diff
+      DIRECTIONS_AND_DIFFS[@direction]
+    end
   end
 end
