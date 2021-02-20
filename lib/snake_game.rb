@@ -32,6 +32,10 @@ class SnakeGame
     "j" => :DOWN,
     "l" => :RIGHT,
     "h" => :LEFT,
+    :ARROW_UP    => :UP,
+    :ARROW_DOWN  => :DOWN,
+    :ARROW_RIGHT => :RIGHT,
+    :ARROW_LEFT  => :LEFT,
   }
 
   # キー入力を受付するスレッド
