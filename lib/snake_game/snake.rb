@@ -1,8 +1,16 @@
+# Snake を表します。
+# Board の子クラスでもよかったかも？
 class SnakeGame
   class Snake
     attr_reader :coordinates
     attr_reader :reserved_growth_coordinates
 
+    #
+    # coordinates  Snake の位置する座標の配列を表します。
+    #              先頭が頭の位置、終端が尻尾の位置です。
+    # direction    Snake の進行方向を表します。
+    #              :TOP, :BOTTOM, :LEFT, :RIGHT
+    #              で指定します。
     def initialize(coordinates, direction)
       @coordinates  = coordinates
       @direction    = direction
@@ -18,11 +26,13 @@ class SnakeGame
       @direction = direction
     end
 
+    # 現在の進行方向で一つ移動した時に頭がくる座標を返します。
     def next_head_coordinate
       @coordinates.first.
         zip(direction_diff).map(&:sum)
     end
 
+    # Snake を進行方向へ移動させます。
     def move
       growth =
         @coordinates[-1] == @reserved_growth_coordinates.first
@@ -38,6 +48,8 @@ class SnakeGame
                                 @coordinates[0..-2]
                               end
 
+      # 次回の頭の位置に、次回の体の位置があるかどうかの判定
+      # (ぶつかり判定)
       next_body_coordinates.include?(next_head_coordinate) and
         return false
 

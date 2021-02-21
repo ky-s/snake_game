@@ -4,6 +4,23 @@ class SnakeGame
   module KeyPrompt
     module_function
 
+    # 入力受付ループをします。
+    # block を渡して使用します。
+    #
+    # KeyPrompt.loop do |input|
+    #   ...
+    # end
+    #
+    # block には、入力されたキー情報が与えられます。
+    #
+    # 特殊入力対応
+    # - Control+c が入力されたらループをやめて停止
+    # - Arrow Key の入力を変換して返却
+    #   '\e[A' => :ARROW_UP
+    #   '\e[B' => :ARROW_DOWN
+    #   '\e[C' => :ARROW_RIGHT
+    #   '\e[D' => :ARROW_LEFT
+    #     
     def loop
       input = nil
       until input == "\C-c"

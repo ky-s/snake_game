@@ -1,3 +1,6 @@
+# 画面描画を司ります。
+# board オブジェクトの状態を
+# skin で変換して画面表示します。
 class SnakeGame
   module Renderer
 
@@ -7,6 +10,7 @@ class SnakeGame
 
     def render_board(board, skin: nil, pause: false)
       skin ||= DEFAULT_SKIN
+
       refreash_screen
 
       puts board.field.

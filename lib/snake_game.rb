@@ -2,7 +2,49 @@ require_relative 'snake_game/board'
 require_relative 'snake_game/renderer'
 require_relative 'snake_game/key_prompt'
 
+# SnakeGame を司るクラス
+# ---
+#   Board クラスにゲーム盤のサイズや Snake,
+#   餌などのオブジェクトをまかせて、
+#   Renderer モジュールで board を定期的に render します。
+#   ユーザのキー入力は sub-thread にして、
+#   KeyPrompt モジュールを使用して受け取ります。
+#
+#   CAUTION 何故か、改行コードが \r\n でないと改行後の列が先頭に戻らない。
+#
+# 仕様
+# ---
+# 一般的な SnakeGame です。
+#
+# ２次元平面上の Snake が一定間隔で進行方向に移動していきます。
+# Snake の進行方向は、 矢印キーか、 h,j,k,l キーで操作できます。
+#
+# ボード上には Snake の他に餌が常に一つあります。
+# Snake が餌を取るたびに、ボード上に新しい餌がランダムで出現します。
+# Snake が餌を取ると、その餌の位置を、
+# Snake の尻尾が通り過ぎるときに、 Snake が成長します。
+#
+# Snake の頭が自分自身の体に激突したり、
+# ボードからはみ出したらゲームオーバー。
+# Control+c を入力されてもゲームオーバーになります。
+#
+# Score は Snake のサイズ(ブロック数) とほぼ等価です。
+# ただし、 Snake が餌を取ったタイミングで増加します。
+#
 class SnakeGame
+  #
+  # rows, cols ボードの縦、横のサイズを指定します。
+  #            Board クラスにそのまま渡します。
+  #
+  # speed      Snake の移動速度、実際には sleep 時間を秒で指定します。
+  #
+  # skin       ゲームの見た目を指定します。文字列で、
+  #            空きブロック, Snakeブロック、餌ブロックの順に
+  #            Charactor を指定します。
+  #            e.g. '⬜⬛🔶'
+  #            NOTE: GUI でのプレイも考えると、
+  #            Renderer クラス自体をカスタムして渡すほうがよさそう。
+  #
   def initialize(rows = 10, cols = 10, speed: 0.3, skin: nil)
     @board     = Board.new(rows, cols)
     @speed     = speed

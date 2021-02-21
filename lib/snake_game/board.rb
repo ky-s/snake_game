@@ -1,5 +1,8 @@
 require_relative 'snake'
 
+# ゲームの盤面を表すクラスです。
+# 縦横サイズと Snake, 餌オブジェクトの位置管理を担当。
+# また、餌 (bait) を自動で出現させたり、 Snake を移動させる制御も行います。
 class SnakeGame
   class Board
     attr_reader :rows, :cols
@@ -17,6 +20,10 @@ class SnakeGame
       @snake.set_direction(direction)
     end
 
+    # Snake を進行方向へ移動させます。
+    # Board からはみ出すかどうかは Board の役割としてチェックします。
+    # ただし、 Snake が自身の体に激突するかどうかは snake 自身に判断してもらいます。
+    # 移動できなかった場合(= game over) は false を返します。
     def snake_move
       Range.new(0, @rows-1).include?(@snake.next_head_coordinate[0]) or
         return false
@@ -36,6 +43,32 @@ class SnakeGame
       true
     end
 
+    # 画面上の情報を2次元配列にして返します。
+    # 空きブロックは '.'
+    # Snake ブロックは '*'
+    # 餌ブロックは '@'
+    # で返却します。
+    def field
+      Array.new(@rows) { Array.new(@cols, '.') }.tap do |board|
+        @snake.coordinates.each do |i, j|
+          board[i][j] = '*'
+        end
+
+        i, j = *@bait_coordinate
+        board[i][j] = '@'
+      end
+    end
+
+    # score は、蛇の現在の体のサイズと、取得済み餌の成長分を加算した値です。
+    def score
+      @snake.coordinates.size +
+        @snake.reserved_growth_coordinates.size
+    end
+
+    private
+
+    # 餌をランダムで出現させます。
+    # Snake の体の上には出現させません。
     def put_bait
       generated = false
 
@@ -49,24 +82,9 @@ class SnakeGame
       @bait_coordinate = new_bait_coordinate
     end
 
-    def field
-      Array.new(@rows) { Array.new(@cols, '.') }.tap do |board|
-        @snake.coordinates.each do |i, j|
-          board[i][j] = '*'
-        end
 
-        i, j = *@bait_coordinate
-        board[i][j] = '@'
-      end
-    end
-
-    def score
-      @snake.coordinates.size +
-        @snake.reserved_growth_coordinates.size
-    end
-
-    private
-
+    # Snake の初期位置を決めて、 Snake オブジェクトを生成して返します。
+    # 画面中央列の後方に、行数の 1/4 のサイズで出現します。
     def initial_snake
       j = (@cols - 1) / 2
       first_size = @rows / 4
