@@ -3,9 +3,10 @@ require_relative 'snake_game/renderer'
 require_relative 'snake_game/key_prompt'
 
 class SnakeGame
-  def initialize(rows = 10, cols = 10, speed: 0.3)
+  def initialize(rows = 10, cols = 10, speed: 0.3, skin: nil)
     @board     = Board.new(rows, cols)
     @speed     = speed
+    @skin      = skin
     @game_over = false
     @pause     = false
   end
@@ -14,7 +15,7 @@ class SnakeGame
     inkey_thread
 
     until @game_over
-      Renderer::render_board(@board, pause: @pause)
+      Renderer::render_board(@board, pause: @pause, skin: @skin)
 
       sleep @speed
 
@@ -25,7 +26,7 @@ class SnakeGame
     end
 
     # 最終局面を表示
-    Renderer::render_board(@board)
+    Renderer::render_board(@board, skin: @skin)
 
     inkey_thread.kill
 

@@ -3,10 +3,10 @@ class SnakeGame
 
     module_function
 
-    # SKIN = '□■◆'
-    SKIN = '⬜⬛🔶'
+    DEFAULT_SKIN = '□■◆'
 
-    def render_board(board, skin: SKIN, pause: false)
+    def render_board(board, skin: nil, pause: false)
+      skin ||= DEFAULT_SKIN
       refreash_screen
 
       puts board.field.
